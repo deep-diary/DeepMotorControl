@@ -1,0 +1,10 @@
+config load "D:\BlueDoc\MotorDriver\Project\mt81\DeepMotor81\DeepMotor.ioc"
+project toolchain STM32CubeIDE
+
+SetStructure Advanced
+
+project setCustomFWPath "D:\BlueDoc\Motor Driver\Project\MBD\STM32Cube_FW_G4_V1.5.0"
+
+project generate 
+
+exit wait
