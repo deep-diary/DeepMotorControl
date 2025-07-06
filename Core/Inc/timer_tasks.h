@@ -10,6 +10,7 @@
 #include "FOC.h"
 #include "tim.h"
 #include "camera_platform.h"
+#include "spi.h"
 // ???????
 typedef struct {
     bool flag_1ms;    // 1ms ????

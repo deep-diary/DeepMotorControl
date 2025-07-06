@@ -1,8 +1,6 @@
 # MDK-ARM 编译输出目录
 MDK-ARM/DeepMotor/
 
-# STM32CubeMX 生成的驱动文件
-Drivers/
 
 # MDK-ARM 常见临时文件
 *.o

@@ -32,6 +32,8 @@ extern "C" {
 
 /* USER CODE END Includes */
 
+extern SPI_HandleTypeDef hspi1;
+
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
@@ -41,9 +43,21 @@ void MX_SPI1_Init(void);
 /* USER CODE BEGIN Prototypes */
 extern	uint8_t txBuffer[2];  // Command to read angle data
 extern  uint8_t rxBuffer[2],rxBufferDMA[2];                 // Buffer to receive data
-extern	float puAngle;
-extern void Read_AS5047P(void);
+extern	float puAngle, puAngleDMA;
+// extern void Read_AS5047P(void);
+extern void Read_AS5047P_HAL(void);
+extern void Read_AS5047P_Complete(void);
+extern void Read_AS5047P_Simple(void);
+extern void Read_AS5047P_Separate(void);
+extern void Read_AS5047P_Software_CS(void);
+extern void Read_AS5047P_Low_Speed(void);
+extern void Test_SPI_Communication(void);
 extern void Read_SC60228(void);
+extern uint16_t spi_tx_buf;
+extern uint16_t spi_rx_buf;
+extern volatile uint16_t as5047p_angle;
+extern volatile uint8_t as5047p_dma_ready;
+extern void AS5047P_Start_DMA(void);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
