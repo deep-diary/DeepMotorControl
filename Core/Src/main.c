@@ -1788,7 +1788,7 @@ int main(void)
 //        while (!as5047p_dma_ready); // 等待DMA完成
 //        as5047p_dma_ready = 0;
 		
-			  Read_AS5047P_Software_CS();
+			  Read_AS5047P_HAL();
 		
         HAL_Delay(1); // 1ms周期
 
@@ -1913,7 +1913,6 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 				else
 				{
 						HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_15);
-						Read_AS5047P_Separate();  // 修正：使用分离的发送接收函数进行测试
 						//Read_SC60228();
 					  
 					

@@ -64,7 +64,7 @@ void MX_SPI1_Init(void)
   hspi1.Init.DataSize = SPI_DATASIZE_8BIT;  // 修正：改为8位数据大小，因为使用8位数组
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;  // 修正：CPOL=0 (时钟空闲时为低电平)
   hspi1.Init.CLKPhase = SPI_PHASE_2EDGE;      // 修正：CPHA=1 (第二个边沿采样，即下降沿)
-  hspi1.Init.NSS = SPI_NSS_HARD_OUTPUT;
+  hspi1.Init.NSS = SPI_NSS_HARD_OUTPUT; //SPI_NSS_SOFT   SPI_NSS_HARD_OUTPUT
   hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;  // 修正：10MHz时钟，160MHz/16=10MHz
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;  // 修正：MSB first
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
@@ -215,18 +215,32 @@ void Read_AS5047P_HAL(void)
 {
 	uint16_t puAngle_HAL;
 	
-	// 发送读取角度命令 (0x3FFF) 并接收数据
-	HAL_SPI_TransmitReceive(&hspi1, txBuffer, rxBuffer, 2, HAL_MAX_DELAY);
+	uint16_t rawData;
+	uint8_t tx_cmd[2] = {0x3F, 0xFF};
+	uint8_t rx_data[2] = {0x00, 0x00};
 	
-	// AS5047P返回的数据格式：高字节在前，低字节在后
-	// 需要交换字节序来正确解析
-	puAngle_HAL = (rxBuffer[0] << 8) | rxBuffer[1];
+	// 禁用硬件片选，使用软件控制
+	__HAL_SPI_DISABLE(&hspi1);
+	hspi1.Init.NSS = SPI_NSS_SOFT;
+	short_delay(20);  // 短暂延时
+	__HAL_SPI_ENABLE(&hspi1);
 	
-	// 提取14位角度数据 (去掉最高两位的状态位)
-	puAngle_HAL &= 0x3FFF;
+	// 手动控制片选
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_RESET);  // 片选拉低
+	short_delay(20);  // 短暂延时
 	
-	// 转换为角度值 (0-1.0)
-	puAngle = (float)puAngle_HAL / 16384.0f;
+	// 发送命令并接收数据
+	if (HAL_SPI_TransmitReceive(&hspi1, tx_cmd, rx_data, 2, HAL_MAX_DELAY) == HAL_OK)
+	{
+		rawData = (rx_data[0] << 8) | rx_data[1];
+		puAngle_LL = rawData & 0x3FFF;
+		puAngle = (float)puAngle_LL / 16384.0f;
+	}
+
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET);  // 片选拉高
+  __HAL_SPI_DISABLE(&hspi1);
+	hspi1.Init.NSS = SPI_NSS_HARD_OUTPUT;
+	__HAL_SPI_ENABLE(&hspi1);
 }
 
 // 更完整的AS5047P读取函数，包含错误检查
@@ -303,52 +317,6 @@ void Read_AS5047P_Simple(void)
 	}
 }
 
-// 分离的发送和接收函数，用于调试
-void Read_AS5047P_Separate(void)
-{
-	uint16_t rawData;
-	uint8_t tx_cmd[2] = {0x3F, 0xFF};  // 读取角度命令
-	uint8_t rx_data[2] = {0x00, 0x00};  // 清零接收缓冲区
-	
-	// 手动控制片选信号
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_RESET);  // 片选拉低
-	short_delay(10);  // 短暂延时
-	
-	// 先发送命令
-	if (HAL_SPI_Transmit(&hspi1, tx_cmd, 2, HAL_MAX_DELAY) == HAL_OK)
-	{
-		// 再接收数据
-		if (HAL_SPI_Receive(&hspi1, rx_data, 2, HAL_MAX_DELAY) == HAL_OK)
-		{
-			// 处理接收到的数据
-			rawData = (rx_data[0] << 8) | rx_data[1];
-			puAngle_LL = rawData & 0x3FFF;
-			puAngle = (float)puAngle_LL / 16384.0f;
-		}
-	}
-	
-	// 片选拉高
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET);
-}
-
-// 调试函数：测试SPI通信
-void Test_SPI_Communication(void)
-{
-	uint8_t test_tx[2] = {0xAA, 0x55};  // 测试模式
-	uint8_t test_rx[2] = {0x00, 0x00};
-	
-	// 清零接收缓冲区
-	test_rx[0] = 0x00;
-	test_rx[1] = 0x00;
-	
-	// 发送测试数据
-	if (HAL_SPI_TransmitReceive(&hspi1, test_tx, test_rx, 2, HAL_MAX_DELAY) == HAL_OK)
-	{
-		// 检查接收到的数据
-		// 如果MISO线浮空或连接有问题，可能接收到0x00或0xFF
-		// 如果连接正常，应该接收到AS5047P的响应
-	}
-}
 
 // 使用软件片选的AS5047P读取函数
 void Read_AS5047P_Software_CS(void)
@@ -358,14 +326,14 @@ void Read_AS5047P_Software_CS(void)
 	uint8_t rx_data[2] = {0x00, 0x00};
 	
 	// 禁用硬件片选，使用软件控制
-	//__HAL_SPI_DISABLE(&hspi1);
-	// hspi1.Init.NSS = SPI_NSS_SOFT;
-	//short_delay(20);  // 短暂延时
-	// __HAL_SPI_ENABLE(&hspi1);
+	__HAL_SPI_DISABLE(&hspi1);
+	hspi1.Init.NSS = SPI_NSS_SOFT;
+	short_delay(20);  // 短暂延时
+	__HAL_SPI_ENABLE(&hspi1);
 	
-	// // 手动控制片选
-	// HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_RESET);  // 片选拉低
-	// short_delay(20);  // 短暂延时
+	// 手动控制片选
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_RESET);  // 片选拉低
+	short_delay(20);  // 短暂延时
 	
 	// 发送命令并接收数据
 	if (HAL_SPI_TransmitReceive(&hspi1, tx_cmd, rx_data, 2, HAL_MAX_DELAY) == HAL_OK)
@@ -376,37 +344,13 @@ void Read_AS5047P_Software_CS(void)
 	}
 	
 
-	
-	// // 恢复硬件片选
-	 __HAL_SPI_DISABLE(&hspi1);
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET);  // 片选拉高
+  __HAL_SPI_DISABLE(&hspi1);
+	hspi1.Init.NSS = SPI_NSS_HARD_OUTPUT;
+	__HAL_SPI_ENABLE(&hspi1);
 	
 }
 
-// 低时钟频率测试函数
-void Read_AS5047P_Low_Speed(void)
-{
-	uint16_t rawData;
-	uint8_t tx_cmd[2] = {0x3F, 0xFF};
-	uint8_t rx_data[2] = {0x00, 0x00};
-	
-	// 临时降低时钟频率
-	__HAL_SPI_DISABLE(&hspi1);
-	hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;  // 降低到2.5MHz
-	__HAL_SPI_ENABLE(&hspi1);
-	
-	// 发送命令并接收数据
-	if (HAL_SPI_TransmitReceive(&hspi1, tx_cmd, rx_data, 2, HAL_MAX_DELAY) == HAL_OK)
-	{
-		rawData = (rx_data[0] << 8) | rx_data[1];
-		puAngle_LL = rawData & 0x3FFF;
-		puAngle = (float)puAngle_LL / 16384.0f;
-	}
-	
-	// 恢复原始时钟频率
-	__HAL_SPI_DISABLE(&hspi1);
-	hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
-	__HAL_SPI_ENABLE(&hspi1);
-}
 
 // === 新增：AS5047P DMA启动函数 ===
 void AS5047P_Start_DMA(void)
