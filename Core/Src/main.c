@@ -1776,19 +1776,22 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 
       // 启动前先丢弃一次
-//    AS5047P_Start_DMA();
-//    while (!as5047p_dma_ready); // 等待DMA完成
-//    as5047p_dma_ready = 0;      // 清零标志
+   
+
 		
   while (1)
   {
 		// TimerTasks_Scheduler();
 
-//        AS5047P_Start_DMA();
-//        while (!as5047p_dma_ready); // 等待DMA完成
-//        as5047p_dma_ready = 0;
+       AS5047P_Start_DMA();
+       if(as5047p_dma_ready)
+       {
+        as5047p_dma_ready = 0;
+        printf("as5047p_angleDMA: %f\r\n",puAngleDMA);
+       }
 		
-			  Read_AS5047P_HAL();
+				//Read_AS5047P_Simple();
+        //Read_AS5047P_Complete();
 		
         HAL_Delay(1); // 1ms周期
 

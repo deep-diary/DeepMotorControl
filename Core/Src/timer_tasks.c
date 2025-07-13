@@ -29,8 +29,8 @@ static void task_10ms(void) {
     //printf("Executing 10ms task\n");
     // update platform position
     camera_10ms_task();
-	  Read_AS5047P_HAL();
-		Read_AS5047P_Complete();
+	  Read_AS5047P_Simple();
+		//Read_AS5047P_Complete();
 }
 
 static void task_100ms(void) {

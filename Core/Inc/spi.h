@@ -41,20 +41,19 @@ extern SPI_HandleTypeDef hspi1;
 void MX_SPI1_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-extern	uint8_t txBuffer[2];  // Command to read angle data
-extern  uint8_t rxBuffer[2],rxBufferDMA[2];                 // Buffer to receive data
+extern	uint16_t txBuffer;  // Command to read angle data，16位
+extern  uint16_t rxBuffer, rxBufferDMA;                 // Buffer to receive data，16位
 extern	float puAngle, puAngleDMA;
-// extern void Read_AS5047P(void);
-extern void Read_AS5047P_HAL(void);
+// extern void Read_AS5047P(void);;
 extern void Read_AS5047P_Complete(void);
 extern void Read_AS5047P_Simple(void);
-extern void Read_AS5047P_Software_CS(void);
 extern void Read_SC60228(void);
 extern uint16_t spi_tx_buf;
 extern uint16_t spi_rx_buf;
 extern volatile uint16_t as5047p_angle;
 extern volatile uint8_t as5047p_dma_ready;
 extern void AS5047P_Start_DMA(void);
+extern void Test_AS5047P_Read(void);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

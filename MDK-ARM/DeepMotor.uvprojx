@@ -339,7 +339,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>STM32G431xx,USE_HAL_DRIVER,__TARGET_FPU_VFP,ARM_MATH_CM4,USE_FULL_LL_DRIVER</Define>
+              <Define>STM32G431xx,USE_HAL_DRIVER,__TARGET_FPU_VFP,ARM_MATH_CM4</Define>
               <Undefine></Undefine>
               <IncludePath>../Core/Inc;../Drivers/STM32G4xx_HAL_Driver/Inc;../Drivers/CMSIS/Device/ST/STM32G4xx/Include;../Drivers/CMSIS/Include;../Drivers/STM32G4xx_HAL_Driver/Inc/Legacy;../Matlab;../EEPROM_Emul;../EEPROM_Emul/Core;../EEPROM_Emul/Porting;../Middlewares/ST/ARM/DSP/Inc</IncludePath>
             </VariousControls>
@@ -1060,6 +1060,11 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
+            </File>
+            <File>
+              <FileName>stm32g4xx_ll_rcc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\stm32g4xx_ll_rcc.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -2602,6 +2607,16 @@
               </FileOption>
             </File>
             <File>
+              <FileName>stm32g4xx_hal_spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Drivers\STM32G4xx_HAL_Driver\Src\stm32g4xx_hal_spi.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32g4xx_hal_spi_ex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Drivers\STM32G4xx_HAL_Driver\Src\stm32g4xx_hal_spi_ex.c</FilePath>
+            </File>
+            <File>
               <FileName>stm32g4xx_hal_tim.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_tim.c</FilePath>
@@ -2712,21 +2727,6 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
-            </File>
-            <File>
-              <FileName>stm32g4xx_ll_rcc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Drivers\STM32G4xx_HAL_Driver\Src\stm32g4xx_ll_rcc.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32g4xx_hal_spi.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Drivers\STM32G4xx_HAL_Driver\Src\stm32g4xx_hal_spi.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32g4xx_hal_spi_ex.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Drivers\STM32G4xx_HAL_Driver\Src\stm32g4xx_hal_spi_ex.c</FilePath>
             </File>
           </Files>
         </Group>
